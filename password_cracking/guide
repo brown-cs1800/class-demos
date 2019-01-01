@@ -1,0 +1,207 @@
+What is hashcat? 
+
+Hashcat is the self-proclaimed free fastest password recovery tool.
+
+How to setup hashcat?
+
+You can use legacy-hashcat (https://github.com/hashcat/hashcat-legacy) which doesn’t have GPU. You can clone the git repo and follow along or try this demo on your own. More detailed instructions can be found: https://cs.brown.edu/courses/cs166/demos/ 
+
+Benchmark hashes with hashcat:
+
+./hashcat-cli64.bin -b
+
+Cracking unsalted MD5: 
+
+Step 1: Create a word list
+
+Wordlist: (TA passwords, most common of 2017, student examples, etc)
+roberto12345
+letmein
+juliaqwerty
+$hakennot$t1rr3d
+secret@gentman
+ilovedrones
+12345678
+password
+password1234
+hello
+starwars
+
+Step 2: Create the hashes of your wordlist file. For this example I used md5sum:
+
+for i in $(cat wordlist); do echo -n "$i"| md5sum | tr -d " *-" >> hashes; done
+
+
+Step 3: Get a dictionary file: I used rockyou.txt (https://wiki.skullsecurity.org/Passwords) which lists most common passwords from the RockYou hack a couple years back (https://techcrunch.com/2009/12/14/rockyou-hack-security-myspace-facebook-passwords/). 
+
+Step 4: Run hashcat dictionary attack:
+
+./hashcat-cli64.bin -m 0 -a 0 hashes rockyou.txt
+
+***
+Notes:
+
+What is hashcat doing? 
+
+-m [NUM]: hash type
+0 = MD5
+
+hashes: The MD5 hashfile we made
+
+rockyou.txt: The rockyou dictionary file
+
+***
+
+Cracking MD5Crypt with Salt:
+
+Step 1: Use the word list from part 1, create a new hash file this time by adding a salt to your password. For our example the salt will be the same for all passwords. This is BAD. Do not do this:
+
+for i in $(cat wordlist); do openssl passwd -1 -salt "supersecretsalt" "$i" | tr -d " -" >> hashes; done
+
+What does this do: 
+-1:  md5-based password algorithm
+-salt [SALT]: salts the password
+
+Step 2: Run hashcat
+
+This time we will be using md5crypt, MD5 (Unix), Cisco-IOS $1$ (MD5) so the flag will be: -m 500. You can find the different encryption flags here: https://hashcat.net/wiki/doku.php?id=example_hashes
+
+./hashcat-cli64.bin -m 500 salthashes rockyou.txt
+
+Cracking with Mask:
+
+Step 1:
+
+Make a wordlist of passwords to test that are the same length:
+
+maskdemo.txt:
+cooll
+beans
+cs166
+apple
+super
+agent
+james
+bondd
+Alice
+Okayy
+cs162
+hacky
+meow1
+
+Step 2: Hash with MD5
+
+for i in $(cat maskdemo.txt); do echo -n "$i"| md5sum | tr -d " *-" >> hashes; done
+
+Step 3: Run hashcat
+
+* Attack modes:
+    0 = Straight
+    1 = Combination
+    2 = Toggle-Case
+    3 = Brute-force
+    4 = Permutation
+    5 = Table-Lookup
+    8 = Prince
+
+Our demo example:  ./hashcat-cli64.bin -a 3 hashes ?l?l?l?l?l
+Built in example: ./hashcat-cli64.bin -a 3 examples/A3.M0.hash ?l?l?l?l?l
+
+Cracking with Rule Based Attacks
+
+Step1: Create a rules file
+
+If you have a list of passwords:
+password
+mysecret
+qwerty
+
+What kind of rules are there?
+
+Add 123 to end:
+password123
+mysecret123
+qwerty123
+
+Capitalize first word:
+Password
+Mysecret
+Qwerty
+
+So you can create a rule file with these two rules:
+$c
+$1 $2 $3
+
+There’s plenty of rule files you can use online. We’re going to be using this one:
+
+:
+#Lowercase
+l
+#Uppercase
+u
+#Capitalise first character
+c
+#Add '1' to the end
+$1
+#Add '2' to the end
+$2
+#Add '3' to the end
+$3
+#Add '4' to the end
+$4
+#Add '5' to the end
+$5
+#Add '6' to the end
+$6
+#Add '7' to the end
+$7
+#Add '8' to the end
+$8
+#Add '9' to the end
+$9
+#Add '123' to the end
+$1 $2 $3
+#Substitute 'a' for '@'
+sa@
+#Substitute 'a' for '4'
+sa4
+#Substitute 'e' for '3'
+se3
+#substitute 'l' for '1'
+sl1
+#Substitute 'a' for '@', 'e' for '3', 'l' for '1'
+sa@ se3 sl1
+#Substitute 'a' for '4', 'e' for '3', 'l' for '1'
+sa4 se3 sl1
+
+Step 3: Run hashcat
+
+./hashcat-cli64.bin -m 0 hashes rockyou.txt -r rule1 --debug-mode=1 --debug-file=matched.rule
+
+Cracking a larger set of passwords? 
+
+In 2012 eHarmony was hacked and the hashed passwords were publicly published. As a CS166 student you can now hack like the pros and recover some eHarmony passwords using hashcat.
+
+Unlike the previous examples, this takes a while to recover all the passwords:
+
+http://www.adeptus-mechanicus.com/codex/hcateasy/hcateasy.php 
+
+Weird things about this set:
+For some reason eHarmony decided to store all the passwords uppercase. So this eliminates a lot of variety 
+eHarmony uses MD5: so try -m 0
+
+Recover passwords of length 6:
+./hashcat-cli64.bin -m 0 -a 3 -1 ?u?d --remove eHarmony.hash ?1?1?1?1?1?1?1
+
+./hashcat-cli64.bin -m 0 eHarmony.hash rockyou.txt 
+
+7. Hashcat with another char set (Russian, Italian, etc)
+
+8. https://haveibeenpwned.com/Password 
+Sources:
+https://www.4armed.com/blog/hashcat-rule-based-attack/
+http://www.adeptus-mechanicus.com/codex/hcateasy/hcateasy.php
+https://www.4armed.com/blog/hashcat-combinator-attack/
+https://www.4armed.com/blog/perform-mask-attack-hashcat/
+
+

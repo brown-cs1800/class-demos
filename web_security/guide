@@ -1,0 +1,51 @@
+1. Download Virtual Box here (https://www.virtualbox.org/) or sudo apt install virtualbox
+
+2. Download Vagrant here (https://www.vagrantup.com) or sudo apt install vagrant
+
+3. Run "vagrant up". Once the machine is up, run "vagrant ssh -- -X" to allow X forwarding and access the gui in "headless mode" over ssh.
+
+4. Make sure you have msql, php and apache installed:
+
+apt-get -y install apache2 mysql-server php php-mysqli php-gd libapache2-mod-php
+
+5. Copy the DVMA repo into the /var/www/html folder. Or clone the repo from (https://github.com/ethicalhack3r/DVWA.git) and follow the instructions to correctly update the config file.
+
+6. Create a database by running "mysql" with the following commands:
+
+mysql> create database dvwa;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> grant all on dvwa.* to dvwa@localhost identified by 'SuperSecretPassword99';
+Query OK, 0 rows affected, 1 warning (0.01 sec)
+
+mysql> flush privileges;
+Query OK, 0 rows affected (0.00 sec)
+
+7. Make sure the dvwa folders all have open read and write permissions on them. Change permissions on folders using "sudo chmod 777 *"
+
+8. Click "Setup DVWA button" in the main menu, then click on the Create / Reset Database button. This will create / reset the database for you with some data in.
+
+9. Change the security level of DVWA from impossible to low by going to the "DVWA Security" tab.
+
+******
+
+SQL Injection: (https://www.computersecuritystudent.com/SECURITY_TOOLS/DVWA/DVWAv107/lesson6/index.html)
+
+Go to the SQL Injection page. Entering an ID reveals information about that user from the database. How can you view all the users in the database at once?
+
+Enter: %' or '0'='0
+
+Will display all records in database.
+
+Stored XSS: (https://www.computersecuritystudent.com/SECURITY_TOOLS/DVWA/DVWAv107/lesson9/index.html)
+
+Go to the stored XSS tab. This is a "guest book" where users can write comments that will be stored on the site. What kinds of bad input can you enter to change the contents of the site?
+
+Enter into the form: <script>alert("You've been hacked!")</script>
+
+
+Reflected XSS:
+
+Go to the reflected XSS tab. Entering your name, you will notice your name is put in the URL under name="".
+
+Instead of entering your name input: <script>alert("You've been hacked!")</script>
