@@ -184,7 +184,7 @@ In 2012 eHarmony was hacked and the hashed passwords were publicly published. As
 
 Unlike the previous examples, this takes a while to recover all the passwords:
 
-http://www.adeptus-mechanicus.com/codex/hcateasy/hcateasy.php 
+http://www.adeptus-mechanicus.com/codex/hcateasy/eharmony.hash
 
 Weird things about this set:
 For some reason eHarmony decided to store all the passwords uppercase. So this eliminates a lot of variety 
