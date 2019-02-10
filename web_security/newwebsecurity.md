@@ -16,6 +16,20 @@ To run DVWA easily:
 SQL Injection:
 Displays all records in DB:
 
+Query being run by the server:
+
+```SELECT first_name, last_name FROM users WHERE user_id = '$id'```
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+Substitute the following in:
 ```%' or '0'='0```
 
 DOM XSS:
